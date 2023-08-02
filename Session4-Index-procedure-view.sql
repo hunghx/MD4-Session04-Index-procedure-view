@@ -52,3 +52,35 @@ end;
 // delimiter ; 
 
 call PROC_SELECT_ON_KH();
+
+-- viết procedure tính tổng doanh thu tù trước đến nay
+delimiter //
+create procedure PROC_GET_TOTAL_FROM_KH(OUT total double)
+begin
+	select sum(soluong*giaban) into total from ctphieuxuat ;
+end;
+// delimiter ; 
+
+call PROC_GET_TOTAL_FROM_KH(@total);
+
+select @total;
+-- tạo 1 thủ tục thêm mới dữ liệu vào bảng sản phẩm, nếu tên sp ít hơn 4 kí tự thì không cho phép thêm 
+delimiter //
+create procedure PROC_INSERT_TO_SP(ma_sp varchar(4),ma_loai_sp varchar(4), ten_sp varchar(50),donvi_tinh varchar(10),ghi_chu varchar(100))
+begin
+	IF  length(ten_sp)>=4 then
+	INSERT INTO SANPHAM (masp,maloaisp,tensp,donvitinh,ghichu) values(ma_sp,ma_loai_sp,ten_sp,donvi_tinh,ghi_chu);
+    else 
+		 signal sqlstate "45000" set MESSAGE_TEXT = "Tên của sản phẩm không thể ít hơn 4 kí tự";
+    end if;
+end;
+// delimiter ;
+call PROC_INSERT_TO_SP("S011","LSP1","hun","người","ghi chú");
+
+-- Khung nhìn (VIEW) : là 1 bảng ảo gồm nhiều cột của nhiều bảng tạo thành, hay bản chất là câu truy vấn
+Create view view_Danh_sach_SP as 
+Select sp.*,lsp.tenloaisp  from sanpham sp join loaisp lsp on sp.maloaisp = lsp.maloaisp;
+
+select * from view_Danh_sach_SP;
+
+
